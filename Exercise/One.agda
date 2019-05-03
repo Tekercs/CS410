@@ -48,10 +48,10 @@ num (suc n) = <> ,- num n
 -- thinnings with the following types.
 
 pick0from4 : List (num 0 <: num 4)
-pick0from4 = o' (o' (o' (o' oz))) ,- []
+pick0from4 = o' (o' (o' (o' oz))) ,- [] -- o' (o' (o' (o' oz))) ,- []
 
 pick1from4 : List (num 1 <: num 4)
-pick1from4 = o' (os (o' (o' oz))) ,- []
+pick1from4 = o' (os (o' (o' oz))) ,- [] -- o' (os (o' (o' oz))) ,- []
 
 pick2from4 : List (num 2 <: num 4)
 pick2from4 = o' (o' (os (os oz))) ,- []
@@ -61,12 +61,15 @@ pick3from4 = o' (os (os (os oz))) ,- []
           
 pick4from4 : List (num 4 <: num 4)
 pick4from4 = os (os (os (os oz))) ,- []
- 
+
+-- F: You were meant to list all solutions, but ok
 
 -- But with more interesting elements, we have fewer options, sometimes.
 
 thinOdds : List (1 ,- 3 ,- 5 ,- [] <: 0 ,- 1 ,- 2 ,- 3 ,- 4 ,- 5 ,- 6 ,- [])
 thinOdds = o' (os ( o' ( os (o' (os (o' oz)))))) ,- []
+
+-- MARK: 2/2
 
 ------------------------------------------------------------------------------
 -- 1.1 Categorical Structure
@@ -396,7 +399,7 @@ mono-<- : forall {X}{xs ys zs : List X}(th th' : xs <: ys)(ph : ys <: zs) ->
              th == th'
 mono-<- th th' ph q with composable-<- th ph
 ... | thph with composable-<- th' ph
-... | th'ph = ?
+... | th'ph = {!!}
 
 ------------------------------------------------------------------------------
 -- 1.7 Pullbacks (pointwise "and")
