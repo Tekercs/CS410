@@ -48,25 +48,25 @@ num (suc n) = <> ,- num n
 -- thinnings with the following types.
 
 pick0from4 : List (num 0 <: num 4)
-pick0from4 = {!!}
+pick0from4 = o' (o' (o' (o' oz))) ,- []
 
 pick1from4 : List (num 1 <: num 4)
-pick1from4 = {!!}
+pick1from4 = o' (os (o' (o' oz))) ,- []
 
 pick2from4 : List (num 2 <: num 4)
-pick2from4 = {!!}
+pick2from4 = o' (o' (os (os oz))) ,- []
 
 pick3from4 : List (num 3 <: num 4)
-pick3from4 = {!!}
+pick3from4 = o' (os (os (os oz))) ,- []
           
 pick4from4 : List (num 4 <: num 4)
-pick4from4 = {!!}
+pick4from4 = os (os (os (os oz))) ,- []
+ 
 
 -- But with more interesting elements, we have fewer options, sometimes.
 
 thinOdds : List (1 ,- 3 ,- 5 ,- [] <: 0 ,- 1 ,- 2 ,- 3 ,- 4 ,- 5 ,- 6 ,- [])
-thinOdds = {!!}
-
+thinOdds = o' (os ( o' ( os (o' (os (o' oz)))))) ,- []
 
 ------------------------------------------------------------------------------
 -- 1.1 Categorical Structure
@@ -75,28 +75,61 @@ thinOdds = {!!}
 -- Construct the identity thinning from any list to itself.
 
 oi : forall {X}{xs : List X} -> xs <: xs
-oi = {!!}
+oi {X} {[]} = oz
+oi {X} {x ,- xs} = os oi
 
 -- Give composition for thinnings. Minimize the number of cases.
 
 _-<-_ : forall {X}{xs ys zs : List X} -> xs <: ys -> ys <: zs -> xs <: zs
-th -<- ph = {!!}
+th -<- o' ph = o' (th -<- ph)
+o' th -<- os ph = o' (th -<- ph)
+os th -<- os ph = os (th -<- ph)
+th -<- oz = th
+
+
 
 infixl 40 _-<-_
 
 -- Prove the following laws. Minimize the number of cases (which will
 -- depend on your definition of _-<-_).
-
 oi-<- : forall {X}{xs ys : List X}(ph : xs <: ys) -> oi -<- ph == ph
-oi-<- ph = {!!}
+oi-<- (o' ph) = o' $= oi-<- ph
+oi-<- (os ph) = os $= oi-<- ph
+oi-<- oz = refl
 
+  
 _-<-oi : forall {X}{xs ys : List X}(th : xs <: ys) -> th -<- oi == th
-th -<-oi = {!!}
+_-<-oi (o' th) = o' $= (th -<-oi)
+_-<-oi (os th) = os $= (th -<-oi)
+oz -<-oi = refl
+
+
 
 assoc-<- : forall {X}{ws xs ys zs : List X}
              (th0 : ws <: xs)(th1 : xs <: ys)(th2 : ys <: zs) ->
              (th0 -<- th1) -<- th2 == th0 -<- (th1 -<- th2)
-assoc-<- th0 th1 th2 = {!!}
+
+assoc-<- th0 th1 (o' th2) =
+  o' (th0 -<- th1 -<- th2)
+    =[ o' $= assoc-<- th0 th1 th2  >=
+  o' (th0 -<- (th1 -<- th2))
+    [QED]
+assoc-<- th0 (o' th1) (os th2) =
+  o' (th0 -<- th1 -<- th2)
+    =[ o' $= assoc-<- th0 th1 th2 >=
+  o' (th0 -<- (th1 -<- th2))
+    [QED]
+assoc-<- (o' th0) (os th1) (os th2) =
+  o' (th0 -<- th1 -<- th2)
+    =[ o' $= assoc-<- th0 th1 th2 >=
+  o' (th0 -<- (th1 -<- th2))
+    [QED]
+assoc-<- (os th0) (os th1) (os th2) =
+  os (th0 -<- th1 -<- th2)
+    =[ os $= assoc-<- th0 th1 th2 >=
+  os (th0 -<- (th1 -<- th2))
+    [QED]
+assoc-<- th0 th1 oz = refl
 
 
 ------------------------------------------------------------------------------
@@ -106,10 +139,16 @@ assoc-<- th0 th1 th2 = {!!}
 -- Show that the empty list embeds into all lists in a unique way.
 
 oe : forall {X}{xs : List X} -> [] <: xs
-oe = {!!}
+oe {X} {[]} = oz
+oe {X} {x ,- xs} = o' oe
 
 oe-unique : forall {X}{xs : List X}(th : [] <: xs) -> th == oe
-oe-unique th = {!!}
+oe-unique (o' th) =
+  o' th
+    =[ o' $= oe-unique th  >=
+  o' oe
+    [QED]
+oe-unique oz = refl
 
 
 ------------------------------------------------------------------------------
@@ -120,15 +159,33 @@ oe-unique th = {!!}
 -- and the embeddings are the identity.
 
 antisym : forall {X}{xs ys : List X}
-             (th : xs <: ys)(ph : ys <: xs) ->
+             (th : xs <: ys)(ph : ys <: xs) -> 
              Sg (xs == ys) \
              { refl -> th == oi * ph == oi }
-antisym th ph = {!!}
+antisym (o' th) (o' ph) with antisym (o' oi -<- th) (o' oi -<- ph)
+antisym (o' th) (o' (o' ph)) | refl , fst , ()
+antisym (o' th) (o' (os ph)) | refl , fst₁ , ()
+antisym (o' th) (os ph) with antisym ph (o' oi -<- th)
+antisym (o' th) (os (o' ph)) | refl , () , snd
+antisym (o' (o' th)) (os (os .oi)) | refl , refl , ()
+antisym (o' (os th)) (os (os .oi)) | refl , refl , ()
+antisym (o' ()) (os oz) | refl , refl , snd
+antisym (os th) (o' ph) with antisym th (o' oi -<- ph)
+antisym (os th) (o' (o' ph)) | refl , fst₁ , ()
+antisym (os th) (o' (os ph)) | refl , fst₁ , ()
+antisym (os th) (os ph) with antisym th ph
+antisym (os th) (os ph) | refl , fst , snd = refl , (os $= fst) , (os $= snd)
+antisym oz oz = refl , refl , refl
+
 
 -- Deduce that oi is unique.
 
 oi-unique : forall {X}{xs : List X}(th : xs <: xs) -> th == oi
-oi-unique th = {!!}
+oi-unique (o' th) with oi-unique (o' oi -<- th)
+oi-unique (o' (o' th)) | ()
+oi-unique (o' (os th)) | ()
+oi-unique (os th) = os $= oi-unique th
+oi-unique oz = refl
 
 
 ------------------------------------------------------------------------------
@@ -142,19 +199,26 @@ oi-unique th = {!!}
 
 select : forall {X}{xs ys : List X}{P : X -> Set} ->
          xs <: ys -> All P ys -> All P xs
-select th pys = {!!}
+select (o' th) (x ,- pys) = select th pys
+select (os th) (x ,- pys) = x ,- select th pys
+select oz pys = pys 
 
 -- Now prove the following laws relating to selecting by the
 -- identity and composition.
 
 select-oi : forall {X}{xs : List X}{P : X -> Set} -> (pxs : All P xs) ->
             select oi pxs == pxs
-select-oi pxs = {!!}
+select-oi [] = refl
+select-oi (x ,- pxs) = (x ,-_) $= select-oi pxs
 
 select-<- : forall {X}{xs ys zs : List X}{P : X -> Set} ->
             (th : xs <: ys)(ph : ys <: zs) -> (pzs : All P zs) ->
             select (th -<- ph) pzs == select th (select ph pzs)
-select-<- th ph pzs = {!!}
+select-<- th oz [] = refl
+select-<- th (o' ph) (x ,- pzs) = select-<- th ph pzs
+select-<- (o' th) (os ph) (x ,- pzs) = select-<- th ph pzs
+select-<- (os th) (os ph) (x ,- pzs) = x ,-_ $= select-<- th ph pzs
+
 
 
 ------------------------------------------------------------------------------
@@ -186,7 +250,15 @@ thinSplit : {X : Set}{xs zs : List X}(th : xs <: zs) ->
             Sg (List X) \ ys ->    -- ...what wasn't from xs...
             Sg (ys <: zs) \ ph ->  -- ...but was in zs...
             Splitting th ph        -- ...hence forms a splitting.
-thinSplit th = {!!}
+thinSplit {zs = []} oz = [] , oz , splitzz
+thinSplit {zs = x ,- zs} (o' th) with thinSplit th
+thinSplit {xs = _} {x ,- .(_ ,- _)} (o' (o' th)) | fst₁ , fst₂ , snd₁ = x ,- fst₁ , os fst₂ , split's snd₁
+thinSplit {xs = _} {x ,- .(_ ,- _)} (o' (os th)) | fst₁ , fst₂ , snd₁ = x ,- fst₁ , os fst₂ , split's snd₁
+thinSplit {xs = _} {x ,- .[]} (o' oz) | fst₁ , fst₂ , snd₁ = x ,- fst₁ , os fst₂ , split's snd₁
+thinSplit {zs = x ,- zs} (os th) with thinSplit th
+thinSplit {_} {_} {x ,- .(_ ,- _)} (os (o' th)) | fst₁ , fst₂ , snd₁ = fst₁ , o' fst₂ , splits' snd₁
+thinSplit {_} {_} {x ,- .(_ ,- _)} (os (os th)) | fst₁ , fst₂ , snd₁ = fst₁ , o' fst₂ , splits' snd₁
+thinSplit {_} {_} {x ,- .[]} (os oz) | fst₁ , fst₂ , snd₁ = fst₁ , o' fst₂ , splits' snd₁
 
 -- Given a splitting, show that we can "riffle" together a bunch
 -- of "All P"-s for each selection to get an "All P" for the whole.
@@ -196,7 +268,9 @@ riffle : forall {X : Set}{xs ys zs : List X}
                 {P : X -> Set} ->
                 All P xs -> Splitting th ph -> All P ys ->
                 All P zs
-riffle pxs s pys = {!!}
+riffle pxs (split's s) (x ,- pys) = x ,- riffle pxs s pys
+riffle (x ,- pxs) (splits' s) pys = x ,- riffle pxs s pys 
+riffle pxs splitzz pys = pys
 
 -- Moreover, we can use a splitting to invert "riffle", dealing
 -- out an "All P" for the whole list into the parts for each
@@ -212,7 +286,11 @@ data Deal {X : Set}{xs ys zs : List X}
 deal : {X : Set}{xs ys zs : List X}
        {th : xs <: zs}{ph : ys <: zs}(s : Splitting th ph)
        {P : X -> Set}(pzs : All P zs) -> Deal s pzs
-deal s pzs = {!!}
+deal (split's s) (x ,- pzs) with deal s pzs
+deal (split's s) (x ,- .(riffle pxs s pys)) | dealt pxs pys = dealt pxs (x ,- pys)
+deal (splits' s) (x ,- pzs) with deal s pzs
+deal (splits' s) (x ,- .(riffle pxs s pys)) | dealt pxs pys = dealt (x ,- pxs) pys
+deal splitzz [] = dealt [] []
 
 
 ------------------------------------------------------------------------------
@@ -248,20 +326,39 @@ deal s pzs = {!!}
 -- just variables and constructors. That means dependent pattern matching
 -- will play nice.
 
+{-
+_-<-_ : forall {X}{xs ys zs : List X} -> xs <: ys -> ys <: zs -> xs <: zs
+th -<- o' ph = o' (th -<- ph)
+o' th -<- os ph = o' (th -<- ph)
+os th -<- os ph = os (th -<- ph)
+th -<- oz = th
+-}
+
+
 data Composable-<- {X : Set}
      : {xs ys zs : List X}
        (th : xs <: ys)(ph : ys <: zs)(thph : xs <: zs)
        -> Set where
-  -- your constructors here!
+     comp-th-oph : {z : X}{xs ys zs : List X}(th : xs <: ys)(ph : ys <: zs)(thph : xs <: zs)
+      -> Composable-<- th ph thph -> Composable-<- {zs = z ,- zs} th (o' ph) (o' thph)
+     comp-oth-osph : {y : X}{xs ys zs : List X}(th : xs <: ys)(ph : ys <: zs)(thph : xs <: zs)
+      -> Composable-<- th ph thph -> Composable-<- {ys = y ,- ys} (o' th) (os ph) (o' thph)
+     comp-osth-osph : {x : X}{xs ys zs : List X}(th : xs <: ys)(ph : ys <: zs)(thph : xs <: zs)
+      -> Composable-<- th ph thph -> Composable-<- {xs = x ,- xs} (os th) (os ph) (os thph)
+     comp-oz-oz : Composable-<- oz oz oz
 
 -- Show that your definition really captures composability by
 -- proving the following.
+
 
 composable-<- : forall {X : Set}{xs ys zs : List X}
                 (th : xs <: ys)(ph : ys <: zs) ->
                 Composable-<- th ph (th -<- ph)
   -- i.e., we have *at least* composition...
-composable-<- th ph = {!!}
+composable-<- th (o' ph) = comp-th-oph th ph (th -<- ph) (composable-<- th ph)
+composable-<- (o' th) (os ph) = comp-oth-osph th ph (th -<- ph) (composable-<- th ph)
+composable-<- (os th) (os ph) = comp-osth-osph th ph (th -<- ph) (composable-<- th ph)
+composable-<- oz oz = comp-oz-oz 
 
 composable-unique : forall {X : Set}{xs ys zs : List X}
                     {th : xs <: ys}{ph : ys <: zs}
@@ -270,7 +367,10 @@ composable-unique : forall {X : Set}{xs ys zs : List X}
                     Composable-<- th ph thph' ->
                     thph == thph'
   -- ...and nothing but composition.
-composable-unique c d = {!!}
+composable-unique (comp-th-oph th ph thph c) (comp-th-oph .th .ph thph1 d) = o' $= composable-unique c d
+composable-unique (comp-oth-osph th ph thph c) (comp-oth-osph .th .ph thph1 d) = o' $= composable-unique c d
+composable-unique (comp-osth-osph th ph thph c) (comp-osth-osph .th .ph thph1 d) = os $= composable-unique c d
+composable-unique comp-oz-oz comp-oz-oz = refl
 
 -- Your prize for establishing the graph representation is to have a nice time
 -- showing that thinnings really are *embeddings* (or "monomorphisms").
@@ -283,7 +383,10 @@ composable-mono : forall {X}{xs ys zs : List X}
   {th th' : xs <: ys}{ph : ys <: zs}{ps : xs <: zs} ->
   Composable-<- th ph ps -> Composable-<- th' ph ps ->
   th == th'
-composable-mono c d = {!!}
+composable-mono (comp-th-oph th ph thph c) (comp-th-oph th₁ .ph .thph d) = composable-mono c d
+composable-mono (comp-oth-osph th ph thph c) (comp-oth-osph th₁ .ph .thph d) = o' $= composable-mono c d
+composable-mono (comp-osth-osph th ph thph c) (comp-osth-osph th₁ .ph .thph d) = os $= composable-mono c d 
+composable-mono comp-oz-oz comp-oz-oz = refl 
 
 -- Now use composable-<- and composable-mono to get a cheap proof of the
 -- following.
@@ -291,8 +394,9 @@ composable-mono c d = {!!}
 mono-<- : forall {X}{xs ys zs : List X}(th th' : xs <: ys)(ph : ys <: zs) ->
              th -<- ph == th' -<- ph ->
              th == th'
-mono-<- th th' ph q = {!!}
-
+mono-<- th th' ph q with composable-<- th ph
+... | thph with composable-<- th' ph
+... | th'ph = ?
 
 ------------------------------------------------------------------------------
 -- 1.7 Pullbacks (pointwise "and")
@@ -359,3 +463,4 @@ pullback-best : forall {X}{xs ys zs : List X} ->
                 Composable-<- ps (side0 bs) (side0 bs') *
                 Composable-<- ps (side1 bs) (side1 bs')
 pullback-best bs' = {!!}
+
