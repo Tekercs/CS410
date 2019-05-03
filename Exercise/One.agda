@@ -134,6 +134,7 @@ assoc-<- (os th0) (os th1) (os th2) =
     [QED]
 assoc-<- th0 th1 oz = refl
 
+-- MARK: 8/8
 
 ------------------------------------------------------------------------------
 -- 1.2 Emptiness
@@ -153,6 +154,7 @@ oe-unique (o' th) =
     [QED]
 oe-unique oz = refl
 
+-- MARK: 6/6
 
 ------------------------------------------------------------------------------
 -- 1.3 Antisymmetry
@@ -184,12 +186,17 @@ antisym oz oz = refl , refl , refl
 -- Deduce that oi is unique.
 
 oi-unique : forall {X}{xs : List X}(th : xs <: xs) -> th == oi
+oi-unique th with antisym th th
+oi-unique th | refl , p , q = p
+{-
 oi-unique (o' th) with oi-unique (o' oi -<- th)
 oi-unique (o' (o' th)) | ()
 oi-unique (o' (os th)) | ()
 oi-unique (os th) = os $= oi-unique th
 oi-unique oz = refl
+-}
 
+-- MARK: 6/6
 
 ------------------------------------------------------------------------------
 -- 1.4 Thinnings as selections
@@ -222,7 +229,7 @@ select-<- th (o' ph) (x ,- pzs) = select-<- th ph pzs
 select-<- (o' th) (os ph) (x ,- pzs) = select-<- th ph pzs
 select-<- (os th) (os ph) (x ,- pzs) = x ,-_ $= select-<- th ph pzs
 
-
+-- MARK: 8/8
 
 ------------------------------------------------------------------------------
 -- 1.5 Splittings
@@ -255,13 +262,15 @@ thinSplit : {X : Set}{xs zs : List X}(th : xs <: zs) ->
             Splitting th ph        -- ...hence forms a splitting.
 thinSplit {zs = []} oz = [] , oz , splitzz
 thinSplit {zs = x ,- zs} (o' th) with thinSplit th
-thinSplit {xs = _} {x ,- .(_ ,- _)} (o' (o' th)) | fst₁ , fst₂ , snd₁ = x ,- fst₁ , os fst₂ , split's snd₁
+thinSplit {xs = _} {x ,- .(_ ,- _)} (o' (o' th)) | _ , _ , p = _ ,- _ , _ , split's p
 thinSplit {xs = _} {x ,- .(_ ,- _)} (o' (os th)) | fst₁ , fst₂ , snd₁ = x ,- fst₁ , os fst₂ , split's snd₁
 thinSplit {xs = _} {x ,- .[]} (o' oz) | fst₁ , fst₂ , snd₁ = x ,- fst₁ , os fst₂ , split's snd₁
 thinSplit {zs = x ,- zs} (os th) with thinSplit th
 thinSplit {_} {_} {x ,- .(_ ,- _)} (os (o' th)) | fst₁ , fst₂ , snd₁ = fst₁ , o' fst₂ , splits' snd₁
 thinSplit {_} {_} {x ,- .(_ ,- _)} (os (os th)) | fst₁ , fst₂ , snd₁ = fst₁ , o' fst₂ , splits' snd₁
 thinSplit {_} {_} {x ,- .[]} (os oz) | fst₁ , fst₂ , snd₁ = fst₁ , o' fst₂ , splits' snd₁
+
+-- F: Variable names could be better
 
 -- Given a splitting, show that we can "riffle" together a bunch
 -- of "All P"-s for each selection to get an "All P" for the whole.
@@ -295,6 +304,7 @@ deal (splits' s) (x ,- pzs) with deal s pzs
 deal (splits' s) (x ,- .(riffle pxs s pys)) | dealt pxs pys = dealt (x ,- pxs) pys
 deal splitzz [] = dealt [] []
 
+-- MARK: 10/10
 
 ------------------------------------------------------------------------------
 -- 1.6 Composability as a relation
@@ -394,6 +404,8 @@ composable-mono comp-oz-oz comp-oz-oz = refl
 -- Now use composable-<- and composable-mono to get a cheap proof of the
 -- following.
 
+-- MARK: 9/10 (one more for mono-<)
+
 mono-<- : forall {X}{xs ys zs : List X}(th th' : xs <: ys)(ph : ys <: zs) ->
              th -<- ph == th' -<- ph ->
              th == th'
@@ -401,9 +413,12 @@ mono-<- th th' ph q with composable-<- th ph
 ... | thph with composable-<- th' ph
 ... | th'ph = {!!}
 
+-- F: should be a one-liner
+
 ------------------------------------------------------------------------------
 -- 1.7 Pullbacks (pointwise "and")
 ------------------------------------------------------------------------------
+-- F: 10 marks (out of 60)
 
 -- If we have a situation like this
 
