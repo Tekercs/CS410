@@ -1,3 +1,4 @@
+-- TOTAL MARK: 26/26 (so far)
 {-# OPTIONS --type-in-type #-}
 {-# OPTIONS --allow-unsolved-metas #-}
 
@@ -50,6 +51,7 @@ module _ {Obj : Set}{Arr : Obj -> Obj -> Set}{I J : Set}
   Reindex : Functor (J -C> C) (I -C> C) (f -_)
   Reindex = record { map = \ x i -> x (f i) ; mapidArr = refl ; map-arr- = \ f₁ g -> refl }
 
+-- MARK: 4/4
 
 ------------------------------------------------------------------------------
 -- FUNCTORIALITY OF ALL
@@ -89,6 +91,8 @@ module _ where
     ; map-arr- = \ f g -> ext \ x -> ext \ x1 -> halpALLmap-arr- x x1
     } 
 
+-- MARK: 6/6
+
 ------------------------------------------------------------------------------
 -- ALL BY TABULATION
 ------------------------------------------------------------------------------
@@ -121,6 +125,8 @@ module _ (I : Set) where  -- fix an element set and open handy kit
     ; map-arr- = \ f g -> refl
     }
 
+-- F: It's almost as if C-c C-a wrote the above function...
+
   -- Prove that tabulate is natural.
 
   helper : forall {I} {X Y : I -> Set} (f : (i : I) -> X i -> Y i)
@@ -133,6 +139,7 @@ module _ (I : Set) where  -- fix an element set and open handy kit
   transform tabulateNT _ = tabulate
   natural tabulateNT f = ext \ x -> ext \ y -> helper f x y
 
+-- MARK: 8/8
 
 ------------------------------------------------------------------------------
 -- 26 November 2018 -- the adventure continues
@@ -182,6 +189,8 @@ module _ (I : Set) where
   selectTabulate {I} {P} {.(x ,- ys)} {.(x ,- zs)} (os {x} {ys} {zs} th) f rewrite oe-unique (oe -<- th) =  f x (os oe) ,-_ $= selectTabulate th \ i x1 -> f i (o' x1)
   selectTabulate {I} {P} {.[]} {.[]} oz f = refl
 
+-- MARK: 6/6
+
   -- Construct the proof that all elements of a list have the property
   -- of being somewhere in the list.
 
@@ -208,6 +217,8 @@ module _ (I : Set) where
            { transform = onlyNTtransform
            ; natural = \ f -> ext \ x -> ext \ x1 -> onlyNTnatural f x x1 
            }
+
+-- MARK: 2/2
 
   -- From these components, assemble the natural transformation which projects
   -- one element from a bunch. That is, if we have (x : i <- is) and we have

@@ -1,3 +1,4 @@
+-- TOTAL MARK: 5/5 (so far)
 {-# OPTIONS --type-in-type #-}
 {-# OPTIONS --allow-unsolved-metas #-}
 
@@ -107,11 +108,15 @@ VEC n = record
     ; map-arr- = \ f g -> ext \ x -> VECmap-arr- f g x
     }
 
+-- MARK: 1/1
+
 -- ??? 3.2
 -- Find the components to make vectors applicative, by pointwise application.
 
 VApp : forall n -> Applicative \ X -> Vec X n
 VApp n = record { pure = vPure ; _<*>_ = _<*V>_ }
+
+-- MARK: 1/1
 
 -- ??? 3.3
 -- Show that vectors respect One and * on types.
@@ -123,6 +128,7 @@ zip : forall {n S T} -> Vec S n * Vec T n -> Vec (S * T) n
 zip ([] , []) = []
 zip ((x ,- ss) , (x₁ ,- ts)) = (x , x₁) ,- zip (ss , ts)
 
+-- MARK: 1/1
 
 ------------------------------------------------------------------------------
 --  Pasting Algebras (for Vectors)
@@ -141,9 +147,21 @@ Pasting C X = [ [[ C ]]Cr X -:> X ]
 -- from Exercise.Two.
 
 vecPaste : forall {X} -> Pasting NatCut (Vec X)
-vecPaste i ((zero , fst₁ , snd) , x ,- x₁ ,- snd₂) rewrite snd = x₁ 
+vecPaste i ((zero , fst₁ , snd) , x ,- x₁ ,- snd₂) rewrite snd = {!x!} 
 vecPaste i ((suc fst1 , fst₁ , snd) , x ,- x1 ,- snd₂) with x +V x1
 ... | result rewrite snd = result
+
+-- F: Instead of "f p rewrite p = e", you can simply do "f refl = e"
+-- F: Instead of "f with e; ... | e' = e'" you can simply do "f = e'"
+--    (in conjunction with the above)
+
+-- F: Finally since x : Vec X 0 in the zero case, x = [] and you can combine
+--    the cases as
+--
+--       vecPaste' i ((n , _ , refl) , x ,- x1 ,- snd₂) = x +V x1
+
+-- MARK: 2/2
+
 
 
 {- END OF COMMENT mango-}

@@ -1,3 +1,4 @@
+-- TOTAL MARK: 50/50 (so far)
 {-# OPTIONS --allow-unsolved-metas #-}
 module Exercise.One where
 
@@ -404,8 +405,6 @@ composable-mono comp-oz-oz comp-oz-oz = refl
 -- Now use composable-<- and composable-mono to get a cheap proof of the
 -- following.
 
--- MARK: 9/10 (one more for mono-<)
-
 mono-<- : forall {X}{xs ys zs : List X}(th th' : xs <: ys)(ph : ys <: zs) ->
              th -<- ph == th' -<- ph ->
              th == th'
@@ -415,6 +414,8 @@ mono-<- th th' ph q with composable-<- th ph
 
 -- F: should be a one-liner
 -- B: i was literlay a rewrite away compared to or meeting ... sad times 
+
+-- MARK: 10/10
 
 ------------------------------------------------------------------------------
 -- 1.7 Pullbacks (pointwise "and")
@@ -483,6 +484,8 @@ pullback-<- (os th) (os ph) with pullback-<- th ph
 pullback-<- (os th) (os ph) | backSquare {side0 = side2} {side3} {diagonal₁} triangle2 triangle3 = backSquare (comp-oth-osph side2 th diagonal₁ triangle2)
                                                                                                      (comp-oth-osph side3 ph diagonal₁ triangle3)
 pullback-<- oz oz = backSquare comp-oz-oz comp-oz-oz
+
+-- F: Hint: pullback-<- (os th) (os ph) is not quite right
 
 -- Then show that every other BackSquare has a corner
 -- which embeds in the pullback, and that the resulting
