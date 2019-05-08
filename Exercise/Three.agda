@@ -147,7 +147,7 @@ Pasting C X = [ [[ C ]]Cr X -:> X ]
 -- from Exercise.Two.
 
 vecPaste : forall {X} -> Pasting NatCut (Vec X)
-vecPaste i ((zero , fst₁ , snd) , x ,- x₁ ,- snd₂) rewrite snd = {!x!} 
+vecPaste i ((zero , fst₁ , snd) , x ,- x₁ ,- snd₂) rewrite snd = x₁
 vecPaste i ((suc fst1 , fst₁ , snd) , x ,- x1 ,- snd₂) with x +V x1
 ... | result rewrite snd = result
 
