@@ -74,7 +74,7 @@ record Applicative (F : Set -> Set) : Set where
     -- You have enough to do, already.
 
 
-{-mango UNCOMMENT WHEN YOU REACH THIS PART OF THE EXERCISE
+{-mango UNCOMMENT WHEN YOU REACH THIS PART OF THE EXERCISE-}
 
 ------------------------------------------------------------------------------
 --  Vector Machinery
@@ -89,23 +89,39 @@ record Applicative (F : Set -> Set) : Set where
 -- ??? 3.1
 -- Show that vectors of any given length are a functor on SET.
 
+VECmapidArr : forall {n} {A} (x : Vec A n) ->
+              vPure (\ x₁ -> x₁) <*V> x == x
+VECmapidArr [] = refl
+VECmapidArr (x ,- x₁) = x ,-_ $= VECmapidArr x₁
+
+VECmap-arr- : forall {n} {A} {B} {C} (f : A -> B) (g : B -> C)
+                     (x : Vec A n) ->
+              vPure (\ a -> g (f a)) <*V> x == vPure g <*V> (vPure f <*V> x)
+VECmap-arr- f g [] = refl
+VECmap-arr- f g (x ,- x₁) = (g (f x)) ,-_ $= VECmap-arr- f g x₁
+
 VEC : (n : Nat) -> Functor SET SET (\ X -> Vec X n)
-VEC n = {!!}
+VEC n = record
+    { map = vec
+    ; mapidArr = ext \ x -> VECmapidArr x
+    ; map-arr- = \ f g -> ext \ x -> VECmap-arr- f g x
+    }
 
 -- ??? 3.2
 -- Find the components to make vectors applicative, by pointwise application.
 
 VApp : forall n -> Applicative \ X -> Vec X n
-VApp n = {!!}
+VApp n = record { pure = vPure ; _<*>_ = _<*V>_ }
 
 -- ??? 3.3
 -- Show that vectors respect One and * on types.
 
 void : forall {n : Nat} -> One -> Vec One n
-void <> = {!!}
+void {n} <> = vPure <>
 
 zip : forall {n S T} -> Vec S n * Vec T n -> Vec (S * T) n
-zip (ss , ts) = {!!}
+zip ([] , []) = []
+zip ((x ,- ss) , (x₁ ,- ts)) = (x , x₁) ,- zip (ss , ts)
 
 
 ------------------------------------------------------------------------------
@@ -125,12 +141,15 @@ Pasting C X = [ [[ C ]]Cr X -:> X ]
 -- from Exercise.Two.
 
 vecPaste : forall {X} -> Pasting NatCut (Vec X)
-vecPaste = {!!}
+vecPaste i ((zero , fst₁ , snd) , x ,- x₁ ,- snd₂) rewrite snd = x₁ 
+vecPaste i ((suc fst1 , fst₁ , snd) , x ,- x1 ,- snd₂) with x +V x1
+... | result rewrite snd = result
 
-END OF COMMENT mango-}
+
+{- END OF COMMENT mango-}
 
 
-{-starfruit UNCOMMENT WHEN YOU REACH THIS PART OF THE EXERCISE
+{-starfruit UNCOMMENT WHEN YOU REACH THIS PART OF THE EXERCISE -}
 
 ------------------------------------------------------------------------------
 --  Cutting in Multiple Dimensions
@@ -154,7 +173,7 @@ _>+<_ : forall {O I} -> O <| I -> O <| I -> O <| I
 -- (iii) The pieces should then be those given for the chosen cut in the
 --       chosen scheme.
 
-C >+< D = {!!}
+C >+< D = Cuts D <! pieces D 
 
 -- ??? 3.6
 -- Right and Left Framing
@@ -235,7 +254,7 @@ example = {!!}
 -- Fibonacci numbers (e.g., 13 and 8), you will find that you cut in
 -- alternating dimensions until you get down to a square of side 1.
 
-END OF COMMENT starfruit-}
+{- END OF COMMENT starfruit-}
 
 
 {-lemon UNCOMMENT WHEN YOU REACH THIS PART OF THE EXERCISE

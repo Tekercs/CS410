@@ -29,9 +29,14 @@ module _ {Obj : Set}{Arr : Obj -> Obj -> Set}(I : Set)(C : Category Arr) where
   -- arrows are index-respecting families of underlying arrows
 
   _-C>_ : Category {I -> Obj} \ S T -> (i : I) -> Arr (S i) (T i)
-  _-C>_ = {!!}
-
-
+  _-C>_ = record
+            { idArr = \ i -> idArr
+            ; _-arr-_ = \ S T i -> (S i) -arr- (T i)
+            ; idArr-arr- = \ S -> ext \ i -> idArr-arr- (S i)
+            ; _-arr-idArr = \ S -> ext \ i -> (S i) -arr-idArr
+            ; assoc-arr- = \ f g h -> ext \ i -> assoc-arr- (f i) (g i) (h i)
+            } 
+  
 -- Now we give you a function f : I -> J between two index sets.
 
 module _ {Obj : Set}{Arr : Obj -> Obj -> Set}{I J : Set}
@@ -43,7 +48,7 @@ module _ {Obj : Set}{Arr : Obj -> Obj -> Set}{I J : Set}
   -- Show that you get a functor from J-indexed things to I-indexed things.
 
   Reindex : Functor (J -C> C) (I -C> C) (f -_)
-  Reindex = {!!}
+  Reindex = record { map = \ x i -> x (f i) ; mapidArr = refl ; map-arr- = \ f₁ g -> refl }
 
 
 ------------------------------------------------------------------------------
@@ -60,11 +65,29 @@ module _ where
   all : {I : Set}{P Q : I -> Set} ->
         [ P -:> Q ] ->
         [ All P -:> All Q ]
-  all f is ps = {!!}
+  all f [] [] = []
+  all f (i ,- is) (p ,- ps) = (f i) p ,- all f is ps
+
+
+  halpALLmapidArr : forall {I} {A : I -> Set} (is : List I)
+                           (x : All A is) ->
+                    all (\ i₁ x₂ -> x₂) is x == x
+  halpALLmapidArr [] [] = refl
+  halpALLmapidArr (x ,- is) (p ,- ps) = p ,-_ $= halpALLmapidArr is ps
+
+  halpALLmap-arr- : forall {I} {A B C : I -> Set}
+                         {f : (i : I) -> A i -> B i} {g : (i : I) -> B i -> C i}
+                         (x : List I) (x₁ : All A x) ->
+                  all (\ i₁ x₂ -> g i₁ (f i₁ x₂)) x x₁ == all g x (all f x x₁)
+  halpALLmap-arr- [] [] = refl
+  halpALLmap-arr- {f = f} {g} (x ,- is) (x1 ,- x₂) = g x ( f x x1) ,-_ $= halpALLmap-arr- is x₂
 
   ALL : (I : Set) -> Functor (I -C> SET) (List I -C> SET) All
-  ALL I = {!!}
-
+  ALL I = record
+    { map = \ x i x₁ -> all (\ i₁ x₂ -> x i₁ x₂) i x₁
+    ; mapidArr = ext \ is -> ext \ x -> halpALLmapidArr is x
+    ; map-arr- = \ f g -> ext \ x -> ext \ x1 -> halpALLmap-arr- x x1
+    } 
 
 ------------------------------------------------------------------------------
 -- ALL BY TABULATION
@@ -80,7 +103,8 @@ i <- is = (i ,- []) <: is
 
 tabulate : {I : Set}{P : I -> Set}(is : List I) ->
              [ (_<- is) -:> P ] -> All P is
-tabulate is f = {!!}
+tabulate {I} {P} [] f = []
+tabulate {I} {P} (x ,- is) f = f x (os oe) ,- tabulate is (\ i z -> f i (o' z))
 
 module _ (I : Set) where  -- fix an element set and open handy kit
   open Category (I -C> SET)
@@ -91,13 +115,23 @@ module _ (I : Set) where  -- fix an element set and open handy kit
   -- also gives you a functor.
 
   AllMem : Functor (I -C> SET) (List I -C> SET) \ P is -> [ (_<- is) -:> P ]
-  AllMem = {!!}
+  AllMem = record
+    { map = \ x i x₁ i₁ x₂ -> x i₁ (x₁ i₁ x₂)
+    ; mapidArr = refl
+    ; map-arr- = \ f g -> refl
+    }
 
   -- Prove that tabulate is natural.
 
+  helper : forall {I} {X Y : I -> Set} (f : (i : I) -> X i -> Y i)
+                (x : List I) (y : (i : I) -> i ,- [] <: x -> X i) ->
+         all f x (tabulate x y) == tabulate x (\ i₁ x₂ -> f i₁ (y i₁ x₂))
+  helper f [] y = refl
+  helper f (x ,- x₁) y = (f x (y x (os oe))) ,-_ $= helper f x₁ \ i z -> y i (o' z)
+
   tabulateNT : NaturalTransformation AllMem (ALL I)
   transform tabulateNT _ = tabulate
-  natural tabulateNT = {!!}
+  natural tabulateNT f = ext \ x -> ext \ y -> helper f x y
 
 
 ------------------------------------------------------------------------------
@@ -112,7 +146,11 @@ module _ {Obj : Set}{Arr : Obj -> Obj -> Set}{I : Set}(C : Category Arr) where
   -- by picking an index.
 
   Point : (i : I) -> Functor (I -C> C) C \ X -> X i
-  Point i = {!!}
+  Point i = record
+    { map = \ x -> x i
+    ; mapidArr = refl
+    ; map-arr- = \ f g -> refl
+    }
 
 module _ (I : Set) where
   open Category (I -C> SET)
@@ -121,41 +159,71 @@ module _ (I : Set) where
 
   -- Prove that the "select" function from Exercise.One is natural.
 
+  selectNTnaturalHelp : forall {I} {is js : List I} (th : is <: js)
+                             {X Y : I -> Set} (f : (i : I) -> X i -> Y i) (x : All X js) ->
+                      all f is (select th x) == select th (all f js x)
+  selectNTnaturalHelp (o' th) f (x ,- x₁) = selectNTnaturalHelp th f x₁
+  selectNTnaturalHelp (os {x₂} th) f (x ,- x₁) = f x₂ x ,-_ $= selectNTnaturalHelp th f x₁
+  selectNTnaturalHelp oz f x = refl
+
   selectNT : {is js : List I}(th : is <: js) ->
              NaturalTransformation
                (ALL I -Func- Point SET js)
                (ALL I -Func- Point SET is)
   transform (selectNT th) X = select th
-  natural (selectNT th) f = {!!}
+  natural (selectNT th) f = ext (\ x -> selectNTnaturalHelp th f x)
 
   -- Show that tabulation fuses with selection.
 
   selectTabulate : {I : Set}{P : I -> Set}{is js : List I}
       (th : is <: js)(f : [ (_<- js) -:> P ]) ->
       select th (tabulate js f) == tabulate is \ i x -> f i (x -<- th)
-  selectTabulate th f = {!!}
+  selectTabulate {I} {P} {is} {.(_ ,- _)} (o' th) f = selectTabulate th \ i x -> f i (o' x)
+  selectTabulate {I} {P} {.(x ,- ys)} {.(x ,- zs)} (os {x} {ys} {zs} th) f rewrite oe-unique (oe -<- th) =  f x (os oe) ,-_ $= selectTabulate th \ i x1 -> f i (o' x1)
+  selectTabulate {I} {P} {.[]} {.[]} oz f = refl
 
   -- Construct the proof that all elements of a list have the property
   -- of being somewhere in the list.
 
   positions : (is : List I) -> All (_<- is) is
-  positions is = tabulate is {!!}
+  positions is = tabulate is \ i z -> z
 
   -- Construct a natural transformation which extracts the only element
   -- from an All P (i ,- [])
 
+  onlyNTtransform : forall {I} (X : I -> Set) (i : I) ->
+                  All X (i ,- []) -> X i
+  onlyNTtransform X i (x ,- []) = x
+
+  onlyNTnatural : forall {I} {X Y : I -> Set}
+                       (f : (i : I) -> X i -> Y i) (x : I) (x1 : All X (x ,- [])) ->
+                f x (onlyNTtransform X x x1) ==
+                onlyNTtransform Y x (all f (x ,- []) x1)
+  onlyNTnatural f x (x1 ,- []) = refl
+
   onlyNT : NaturalTransformation
             (ALL I -Func- Reindex (_,- []) SET)
             (ID (I -C> SET))
-  onlyNT = {!!}
+  onlyNT = record
+           { transform = onlyNTtransform
+           ; natural = \ f -> ext \ x -> ext \ x1 -> onlyNTnatural f x x1 
+           }
 
   -- From these components, assemble the natural transformation which projects
   -- one element from a bunch. That is, if we have (x : i <- is) and we have
   -- Ps for all the is, then we should certainly have a P i.
 
+  projectNTtransform : forall {I} {i : I} {is : List I}
+                            (X : I -> Set) ->
+                     All X is -> X i
+  projectNTtransform {I1} {i} {is} X x = {!!}
+
   projectNT : {i : I}{is : List I}(x : i <- is) ->
               NaturalTransformation (ALL I -Func- Point SET is) (Point SET i)
-  projectNT x = {!!}
+  projectNT x = record
+              { transform = projectNTtransform
+              ; natural = {!!}
+              }
 
   -- Show that tabulating projections is the identity.
 

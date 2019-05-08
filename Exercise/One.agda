@@ -411,9 +411,10 @@ mono-<- : forall {X}{xs ys zs : List X}(th th' : xs <: ys)(ph : ys <: zs) ->
              th == th'
 mono-<- th th' ph q with composable-<- th ph
 ... | thph with composable-<- th' ph
-... | th'ph = {!!}
+... | th'ph rewrite q = composable-mono thph th'ph 
 
 -- F: should be a one-liner
+-- B: i was literlay a rewrite away compared to or meeting ... sad times 
 
 ------------------------------------------------------------------------------
 -- 1.7 Pullbacks (pointwise "and")
@@ -464,10 +465,24 @@ open BackSquare
 
 -- First, construct the pullback square.
 
+-- like antysim build up from bottom to top 
+
 pullback-<- : forall {X}{xs ys zs : List X} ->
               (th : xs <: zs)(ph : ys <: zs) ->
               BackSquare th ph
-pullback-<- th ph = {!!}
+pullback-<- (o' th) (o' ph) with pullback-<- th ph
+pullback-<- (o' th) (o' ph) | backSquare {side0 = side2} {side3} {diagonal₁} triangle2 triangle3 = backSquare (comp-th-oph side2 th diagonal₁ triangle2)
+                                                                                                     (comp-th-oph side3 ph diagonal₁ triangle3)
+pullback-<- (os th) (o' ph) with pullback-<- th ph
+pullback-<- (os th) (o' ph) | backSquare {side0 = side2} {side3} {diagonal₁} triangle2 triangle3 = backSquare (comp-oth-osph side2 th diagonal₁ triangle2)
+                                                                                                     (comp-th-oph side3 ph diagonal₁ triangle3)
+pullback-<- (o' th) (os ph) with pullback-<- th ph
+pullback-<- (o' th) (os ph) | backSquare {side0 = side2} {side3} {diagonal₁} triangle2 triangle3 = backSquare (comp-th-oph side2 th diagonal₁ triangle2)
+                                                                                                     (comp-oth-osph side3 ph diagonal₁ triangle3)
+pullback-<- (os th) (os ph) with pullback-<- th ph
+pullback-<- (os th) (os ph) | backSquare {side0 = side2} {side3} {diagonal₁} triangle2 triangle3 = backSquare (comp-oth-osph side2 th diagonal₁ triangle2)
+                                                                                                     (comp-oth-osph side3 ph diagonal₁ triangle3)
+pullback-<- oz oz = backSquare comp-oz-oz comp-oz-oz
 
 -- Then show that every other BackSquare has a corner
 -- which embeds in the pullback, and that the resulting
@@ -480,5 +495,10 @@ pullback-best : forall {X}{xs ys zs : List X} ->
                 Sg (corner bs' <: corner bs) \ ps ->
                 Composable-<- ps (side0 bs) (side0 bs') *
                 Composable-<- ps (side1 bs) (side1 bs')
-pullback-best bs' = {!!}
-
+pullback-best (backSquare triangle2 (comp-th-oph th ph thph triangle3)) = {!!}
+pullback-best (backSquare (comp-th-oph th1 ph1 .thph triangle2) (comp-oth-osph th ph thph triangle3)) = {!!}
+pullback-best (backSquare (comp-oth-osph th1 ph1 .thph triangle2) (comp-oth-osph th ph thph triangle3)) with pullback-best (backSquare  triangle2 triangle3)
+pullback-best (backSquare (comp-oth-osph th1 ph1 .thph triangle2) (comp-oth-osph th ph thph triangle3)) | fst1 , fst2 , snd1 = {!!}
+pullback-best (backSquare (comp-osth-osph th₁ ph₁ .thph triangle2) (comp-osth-osph th ph thph triangle3)) with pullback-best (backSquare triangle2 triangle3)
+pullback-best (backSquare (comp-osth-osph th₁ ph₁ .thph triangle2) (comp-osth-osph th ph thph triangle3)) | fst1 , fst2 , snd2 = {!!}
+pullback-best (backSquare comp-oz-oz comp-oz-oz) = oz , comp-oz-oz , comp-oz-oz
