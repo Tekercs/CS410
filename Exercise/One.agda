@@ -481,8 +481,8 @@ pullback-<- (o' th) (os ph) with pullback-<- th ph
 pullback-<- (o' th) (os ph) | backSquare {side0 = side2} {side3} {diagonal₁} triangle2 triangle3 = backSquare (comp-th-oph side2 th diagonal₁ triangle2)
                                                                                                      (comp-oth-osph side3 ph diagonal₁ triangle3)
 pullback-<- (os th) (os ph) with pullback-<- th ph
-pullback-<- (os th) (os ph) | backSquare {side0 = side2} {side3} {diagonal₁} triangle2 triangle3 = backSquare (comp-oth-osph side2 th diagonal₁ triangle2)
-                                                                                                     (comp-oth-osph side3 ph diagonal₁ triangle3)
+pullback-<- (os th) (os ph) | backSquare {side0 = side2} {side3} {diagonal₁} triangle2 triangle3 = backSquare (comp-osth-osph side2 th diagonal₁ triangle2)
+                                                                                                     (comp-osth-osph side3 ph diagonal₁ triangle3)
 pullback-<- oz oz = backSquare comp-oz-oz comp-oz-oz
 
 -- F: Hint: pullback-<- (os th) (os ph) is not quite right
@@ -498,10 +498,14 @@ pullback-best : forall {X}{xs ys zs : List X} ->
                 Sg (corner bs' <: corner bs) \ ps ->
                 Composable-<- ps (side0 bs) (side0 bs') *
                 Composable-<- ps (side1 bs) (side1 bs')
-pullback-best (backSquare triangle2 (comp-th-oph th ph thph triangle3)) = {!!}
-pullback-best (backSquare (comp-th-oph th1 ph1 .thph triangle2) (comp-oth-osph th ph thph triangle3)) = {!!}
-pullback-best (backSquare (comp-oth-osph th1 ph1 .thph triangle2) (comp-oth-osph th ph thph triangle3)) with pullback-best (backSquare  triangle2 triangle3)
-pullback-best (backSquare (comp-oth-osph th1 ph1 .thph triangle2) (comp-oth-osph th ph thph triangle3)) | fst1 , fst2 , snd1 = {!!}
-pullback-best (backSquare (comp-osth-osph th₁ ph₁ .thph triangle2) (comp-osth-osph th ph thph triangle3)) with pullback-best (backSquare triangle2 triangle3)
-pullback-best (backSquare (comp-osth-osph th₁ ph₁ .thph triangle2) (comp-osth-osph th ph thph triangle3)) | fst1 , fst2 , snd2 = {!!}
+pullback-best (backSquare (comp-th-oph th ph thph triangle2) (comp-th-oph th₁ ph₁ .thph triangle3)) with pullback-best (backSquare triangle2 triangle3)
+pullback-best (backSquare (comp-th-oph th ph thph triangle2) (comp-th-oph th₁ ph₁ .thph triangle3)) | fst1 , fst2 , snd = fst1 , (fst2 , snd)
+pullback-best (backSquare (comp-th-oph th ph thph triangle2) (comp-oth-osph th₁ ph₁ .thph triangle3)) with pullback-best (backSquare triangle2 triangle3)
+pullback-best (backSquare (comp-th-oph th ph thph triangle2) (comp-oth-osph th₁ ph₁ .thph triangle3)) | fst1 , fst2 , snd = fst1 , (fst2 , comp-th-oph fst1 _ th₁ snd)
+pullback-best (backSquare (comp-oth-osph th ph thph triangle2) (comp-th-oph th₁ ph₁ .thph triangle3)) with pullback-best (backSquare triangle2 triangle3)
+pullback-best (backSquare (comp-oth-osph th ph thph triangle2) (comp-th-oph th₁ ph₁ .thph triangle3)) | fst1 , fst2 , snd = fst1 , (comp-th-oph fst1 _ th fst2 , snd)
+pullback-best (backSquare (comp-oth-osph th ph thph triangle2) (comp-oth-osph th₁ ph₁ .thph triangle3)) with pullback-best (backSquare triangle2 triangle3)
+pullback-best (backSquare (comp-oth-osph th ph thph triangle2) (comp-oth-osph th₁ ph₁ .thph triangle3)) | fst1 , fst2 , snd = o' fst1 , (comp-oth-osph fst1 _ th fst2 , comp-oth-osph fst1 _ th₁ snd)
+pullback-best (backSquare (comp-osth-osph th ph thph triangle2) (comp-osth-osph th₁ ph₁ .thph triangle3)) with pullback-best (backSquare triangle2 triangle3 )
+pullback-best (backSquare (comp-osth-osph th ph thph triangle2) (comp-osth-osph th₁ ph₁ .thph triangle3)) | fst1 , fst2 , snd = os fst1 , comp-osth-osph fst1 _ th fst2 , comp-osth-osph fst1 _ th₁ snd
 pullback-best (backSquare comp-oz-oz comp-oz-oz) = oz , comp-oz-oz , comp-oz-oz

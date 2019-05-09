@@ -1,6 +1,7 @@
 -- TOTAL MARK: 26/26 (so far)
 {-# OPTIONS --type-in-type #-}
 {-# OPTIONS --allow-unsolved-metas #-}
+{-# OPTIONS --irrelevant-projection #-}
 
 module Exercise.Two where
 
@@ -224,17 +225,17 @@ module _ (I : Set) where
   -- one element from a bunch. That is, if we have (x : i <- is) and we have
   -- Ps for all the is, then we should certainly have a P i.
 
-  projectNTtransform : forall {I} {i : I} {is : List I}
-                            (X : I -> Set) ->
-                     All X is -> X i
-  projectNTtransform {I1} {i} {is} X x = {!!}
+  projectNTnatural : forall {I} (i : I) (is : List I)
+                          (x : i ,- [] <: is) (X Y : I -> Set) (f : (i₁ : I) -> X i₁ -> Y i₁)
+                          (x1 : All X is) ->
+                   f i (onlyNTtransform X i (select x x1)) ==
+                   onlyNTtransform Y i (select x (all f is x1))
+  projectNTnatural i is x X Y f x1 = {!!}
 
   projectNT : {i : I}{is : List I}(x : i <- is) ->
               NaturalTransformation (ALL I -Func- Point SET is) (Point SET i)
-  projectNT x = record
-              { transform = projectNTtransform
-              ; natural = {!!}
-              }
+  transform (projectNT {i} x) X x1 = transform onlyNT X i (transform (selectNT x) X x1)
+  natural (projectNT {i} {is} x) {X} {Y} f = ext \ x1 -> projectNTnatural i is x X Y f x1
 
   -- Show that tabulating projections is the identity.
 

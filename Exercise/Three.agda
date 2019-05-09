@@ -191,7 +191,9 @@ _>+<_ : forall {O I} -> O <| I -> O <| I -> O <| I
 -- (iii) The pieces should then be those given for the chosen cut in the
 --       chosen scheme.
 
-C >+< D = Cuts D <! pieces D 
+Cuts (_>+<_ {O} {I} (Cuts2 <! pieces2) (Cuts1 <! pieces1)) x = Cuts2 x + Cuts1 x 
+pieces ((Cuts₁ <! pieces1) >+< (Cuts₂ <! pieces2)) {o} (inl x) = pieces1 x
+pieces ((Cuts₁ <! pieces1) >+< (Cuts₂ <! pieces2)) {o} (inr x) = pieces2 x
 
 -- ??? 3.6
 -- Right and Left Framing
