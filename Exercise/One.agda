@@ -1,4 +1,4 @@
--- TOTAL MARK: 50/50 (so far)
+-- TOTAL MARK: 60/60
 {-# OPTIONS --allow-unsolved-metas #-}
 module Exercise.One where
 
@@ -486,6 +486,7 @@ pullback-<- (os th) (os ph) | backSquare {side0 = side2} {side3} {diagonal₁} t
 pullback-<- oz oz = backSquare comp-oz-oz comp-oz-oz
 
 -- F: Hint: pullback-<- (os th) (os ph) is not quite right
+-- F: Now it is.
 
 -- Then show that every other BackSquare has a corner
 -- which embeds in the pullback, and that the resulting
@@ -509,3 +510,5 @@ pullback-best (backSquare (comp-oth-osph th ph thph triangle2) (comp-oth-osph th
 pullback-best (backSquare (comp-osth-osph th ph thph triangle2) (comp-osth-osph th₁ ph₁ .thph triangle3)) with pullback-best (backSquare triangle2 triangle3 )
 pullback-best (backSquare (comp-osth-osph th ph thph triangle2) (comp-osth-osph th₁ ph₁ .thph triangle3)) | fst1 , fst2 , snd = os fst1 , comp-osth-osph fst1 _ th fst2 , comp-osth-osph fst1 _ th₁ snd
 pullback-best (backSquare comp-oz-oz comp-oz-oz) = oz , comp-oz-oz , comp-oz-oz
+
+-- MARK: 10/10

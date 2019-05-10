@@ -1,7 +1,7 @@
--- TOTAL MARK: 26/26 (so far)
+-- TOTAL MARK: 27/60
 {-# OPTIONS --type-in-type #-}
 {-# OPTIONS --allow-unsolved-metas #-}
-{-# OPTIONS --irrelevant-projection #-}
+-- {-# OPTIONS --irrelevant-projection #-}
 
 module Exercise.Two where
 
@@ -237,6 +237,12 @@ module _ (I : Set) where
   transform (projectNT {i} x) X x1 = transform onlyNT X i (transform (selectNT x) X x1)
   natural (projectNT {i} {is} x) {X} {Y} f = ext \ x1 -> projectNTnatural i is x X Y f x1
 
+-- F: the right transformation, but no naturality proof
+
+-- MARK: 1/3
+
+-- F: no more solutions after this point
+
   -- Show that tabulating projections is the identity.
 
   tabulateProject : {P : I -> Set}{is : List I}(ps : All P is) ->
@@ -259,8 +265,6 @@ module _ (I : Set) where
       transform (projectNT x) P ps0 == transform (projectNT x) P ps1) ->
     ps0 == ps1
   eqAll {ps0 = ps0}{ps1 = ps1} q = {!!}
-  
-
 
 ------------------------------------------------------------------------------
 -- HOW TO CUT THINGS UP
